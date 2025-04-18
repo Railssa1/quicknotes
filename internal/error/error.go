@@ -5,12 +5,12 @@ type StatusError struct {
 	status int
 }
 
-type repositoryError struct {
+type RepositoryError struct {
 	error
 }
 
 func NewRepositoryError(err error) error {
-	return &repositoryError{
+	return RepositoryError{
 		error: err,
 	}
 }

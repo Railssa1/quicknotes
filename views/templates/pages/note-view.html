@@ -1,11 +1,11 @@
 {{ define "title" }}
-  Visualização da nota {{ . }}
+  Visualização da nota {{ .Id.Int }}
 {{ end }}
 
 {{ define "content" }}
     <div>
-        <h3>Esta é a nota {{ . }}</h3>
-        <p>Este é o conteúdo da anotação</p>
+        <h3>{{.Title.String}}</h3>
+        <p>{{.Content.String}}</p>
     </div>
 {{ end }}
 

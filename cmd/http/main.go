@@ -28,17 +28,10 @@ func main() {
 	defer dbpool.Close()
 
 	repository := repository.NewRepository(dbpool)
-	notes, err := repository.Update(2, "teste update", "conteudo 1", "RED")
-	if err != nil {
-		logger.Error(err.Error())
-	}
-	fmt.Println(notes)
+	noteHandler := handlers.NewNoteHandler(repository)
 
 	staticHandler := http.FileServer(http.Dir("views/static/"))
-
 	mux.Handle("/static/", http.StripPrefix("/static", staticHandler))
-
-	noteHandler := handlers.NewNoteHandler()
 
 	mux.Handle("/", handlers.HandlerWithError(noteHandler.ListNotes))
 	mux.Handle("/notes/view", handlers.HandlerWithError(noteHandler.NoteView))

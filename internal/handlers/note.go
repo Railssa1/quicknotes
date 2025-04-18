@@ -3,16 +3,23 @@ package handlers
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
+	"strconv"
 	"text/template"
 
 	e "github.com/Railssa1/quicknotes/internal/error"
+	"github.com/Railssa1/quicknotes/internal/repository"
 )
 
-type noteHandler struct{}
+type noteHandler struct {
+	repository repository.NoteRepository
+}
 
-func NewNoteHandler() *noteHandler {
-	return &noteHandler{}
+func NewNoteHandler(repository repository.NoteRepository) *noteHandler {
+	return &noteHandler{
+		repository: repository,
+	}
 }
 
 // Método para listar notas
@@ -37,9 +44,14 @@ func (nh *noteHandler) ListNotes(w http.ResponseWriter, r *http.Request) error {
 
 // Método para recuperar uma nota
 func (nh *noteHandler) NoteView(w http.ResponseWriter, r *http.Request) error {
-	id := r.URL.Query().Get("id")
-	if id == "" {
+	idParam := r.URL.Query().Get("id")
+	if idParam == "" {
 		return e.WithStatus(errors.New("anotação não encontrada"), http.StatusBadRequest)
+	}
+
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		return err
 	}
 	files := []string{
 		"views/templates/base.html",
@@ -51,7 +63,13 @@ func (nh *noteHandler) NoteView(w http.ResponseWriter, r *http.Request) error {
 		return errors.New("erro ao relizar parser dos arquivos")
 	}
 
-	return t.ExecuteTemplate(w, "base", id)
+	note, err := nh.repository.GetById(id)
+	if err != nil {
+		return err
+	}
+
+	slog.Info("Consulta realizada com sucesso")
+	return t.ExecuteTemplate(w, "base", note)
 }
 
 // Método para criar uma nova
